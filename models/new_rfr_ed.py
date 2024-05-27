@@ -7,6 +7,8 @@ Created on Mon Mar 25 12:54:58 2024
 
 import numpy as np
 import pandas as pd
+import time
+from scipy.io import loadmat
 from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, make_scorer
 from sklearn.ensemble import RandomForestRegressor
@@ -19,15 +21,24 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import SelectKBest, f_regression
 
 #%% Initilize
-# Reading the input file
-file_path = "C:/spydertest/csv/Cum_Rot_Data_7_Features_Log.csv"
-EDData = pd.read_csv(file_path)
-#print(EDData.head())
+mat_data = loadmat('All the Data.mat')
 
-X = EDData[['A/Ac', 'h/B', 'Cr', 'Sand/Clay','amax', 'Ia','CAV']]
-# print(X)
-y = EDData['CR']
-# print(y)
+#print(mat_data)
+
+array_data = mat_data['result_array']
+
+print(array_data)
+
+column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
+
+# Convert the numpy array to a pandas DataFrame with the specified column names
+df = pd.DataFrame(array_data, columns=column_names)
+
+# Now you can access the columns by their names
+X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
+print("X:", X)
+y = df['BER']
+print("y:\n", y)
 
 #Normalize
 scaler = MinMaxScaler()
@@ -81,9 +92,10 @@ current_row = 0
 # Loop over depths and trees to fill the array
 for depth_idx, depth in enumerate(range(1, num_depths + 1)):
     for tree_idx, n_trees in enumerate(trees):
+        start = time.time()
         rfr = RandomForestRegressor(n_estimators=n_trees, random_state=17, max_depth=depth)
         
-        cv_scores = RepeatedKFold(n_splits=5, n_repeats=3, random_state=8)
+        cv_scores = RepeatedKFold(n_splits= 5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(rfr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
         
         print('Trial #:',current_row)
@@ -92,28 +104,31 @@ for depth_idx, depth in enumerate(range(1, num_depths + 1)):
         
         all_cv_scores[current_row, :] = Accuracy_Values
         
-        
         #custom scoring a_20 calulation
         custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
         #Running cross validation
+        
         CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 8)
         Accuracy_Values3 = cross_val_score(rfr,X_train ,y_train,\
                                            cv=CV,scoring=custom_Scoring3)
         
         print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
         print('\nFinal Average Accuracy a_20 index of the model:', round(Accuracy_Values3.mean(),4))
+        print ('Time taken for trial {} is {} sec\n'.format(current_row,
+                                                        time.time()-start))
         
         all_cv_scores2[current_row, :] = Accuracy_Values3
         current_row += 1
 #%% Export
 
 #MAPE
-# df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(cv_folds)])
+df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # # A20
-df_metrics = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
+#df_metrics = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # 
-file_path = "C:/spydertest/csv/CumulRot.xlsx"
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='RFRmape4featsa204', index_label='Depth')
+    df_metrics.to_excel(writer, sheet_name='RFR_MAPE', index_label='Depth')
+# %%

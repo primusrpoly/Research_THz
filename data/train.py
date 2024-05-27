@@ -11,6 +11,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import SelectKBest, f_regression
 
+#%% Initalize
 mat_data = loadmat('All the Data.mat')
 
 #print(mat_data)
@@ -32,6 +33,7 @@ y = df['BER']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+#%%
 # Initialize the Linear Regression model
 model = LinearRegression()
 
