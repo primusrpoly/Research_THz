@@ -46,14 +46,14 @@ X = scaler.fit_transform(X)
 selector = SelectKBest(f_regression, k=4)
 X = selector.fit_transform(X, y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
 
 #log base 10
 #log base 10 produces large mape, can produce numbers above 1 which doens't make sense
 def Accuracy_score(orig,pred):
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator) * 100
+    smape = np.mean(numerator / denominator)
     return smape
 
 def Accuracy_score3(orig,pred):
@@ -84,7 +84,7 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=5000,learning
 #%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 17)
-Accuracy_Values = cross_val_score(knn, X, y, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(lnr, X, y, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -97,7 +97,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values3 = cross_val_score(knn,X ,y,\
+Accuracy_Values3 = cross_val_score(lnr,X ,y,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -114,5 +114,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics_SMAPE.to_excel(writer, sheet_name='kNN_Final_SMAPE', index=False, startrow=0, startcol=0)
-    df_metrics_A20.to_excel(writer, sheet_name='kNN_Final_A20', index=False, startrow=0, startcol=0)
+    df_metrics_SMAPE.to_excel(writer, sheet_name='LNR_Final_SMAPE', index=False, startrow=0, startcol=0)
+    df_metrics_A20.to_excel(writer, sheet_name='LNR_Final_A20', index=False, startrow=0, startcol=0)
