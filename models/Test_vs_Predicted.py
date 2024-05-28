@@ -63,10 +63,10 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=1000,learning
 #%% Test and analysis
 
 # Train the model
-knn.fit(X_train, y_train)
+lnr.fit(X_train, y_train)
 
 # Make predictions
-y_pred = knn.predict(X_test)
+y_pred = lnr.predict(X_test)
 
 # y_test = 10 ** y_test 
 # y_pred = 10 ** y_pred 
@@ -81,7 +81,7 @@ def rsm_error(actual, predicted):
 def Accuracy_score(orig,pred):
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator) * 100
+    smape = np.mean(numerator / denominator)
     return smape
 
 #a20 calculations
@@ -130,5 +130,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # # Export to Excel
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    results_df.to_excel(writer, sheet_name='KNN_TvP2', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='LNR_TvP', index=False, startrow=0, startcol=0)
 # %%

@@ -62,7 +62,7 @@ X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.3, ran
 def Accuracy_score(orig,pred):
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator) * 100
+    smape = np.mean(numerator / denominator) 
     return smape
 
 def Accuracy_score3(orig,pred):
@@ -92,7 +92,7 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=50,learning_r
 #%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 8)
-Accuracy_Values = cross_val_score(knn, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(lnr, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -108,7 +108,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 8)
-Accuracy_Values3 = cross_val_score(knn,X_train,y_train,\
+Accuracy_Values3 = cross_val_score(lnr,X_train,y_train,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -125,6 +125,6 @@ df_selected_features = pd.DataFrame(selected_features.tolist()[::-1], columns=['
 
 #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='KNN_kBestAcc1', index=False, startrow=0, startcol=0)
-    df_selected_features.to_excel(writer, sheet_name='KNN_kBestSF1', index=False, startrow=0, startcol=0)
+    df_metrics.to_excel(writer, sheet_name='LNR_kBestAcc1', index=False, startrow=0, startcol=0)
+    df_selected_features.to_excel(writer, sheet_name='LNR_kBestSF1', index=False, startrow=0, startcol=0)
 

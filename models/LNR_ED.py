@@ -47,7 +47,7 @@ X = scaler.fit_transform(X)
 selector = SelectKBest(f_regression, k=4)
 X = selector.fit_transform(X, y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
 smape_values = []
 a_20values = []

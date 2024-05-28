@@ -7,23 +7,38 @@ Created on Thu Mar 28 15:08:29 2024
 
 import numpy as np
 import pandas as pd
-from sklearn.datasets import fetch_california_housing
+import time
+from scipy.io import loadmat
 from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, make_scorer
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.ensemble import GradientBoostingRegressor, AdaBoostRegressor
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_selection import SelectKBest, f_regression
 
 #%% Initilize
-# Reading the input file
-file_path = "C:/spydertest/csv/Cum_Rot_Data_7_Features_Log.csv"
-EDData = pd.read_csv(file_path)
-#print(EDData.head())
+mat_data = loadmat('All the Data.mat')
 
-X = EDData[['A/Ac', 'h/B', 'Cr', 'Sand/Clay','amax', 'Ia','CAV']]
-# print(X)
-y = EDData['CR']
-# print(y)
+#print(mat_data)
+
+array_data = mat_data['result_array']
+
+print(array_data)
+
+column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
+
+# Convert the numpy array to a pandas DataFrame with the specified column names
+df = pd.DataFrame(array_data, columns=column_names)
+
+# Now you can access the columns by their names
+X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
+#print("X:", X)
+y = df['BER']
+#print("y:\n", y)
 
 #Normalize
 scaler = MinMaxScaler()
@@ -32,22 +47,22 @@ X = scaler.fit_transform(X)
 selector = SelectKBest(f_regression, k=4)
 X = selector.fit_transform(X, y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
 #5,10,15,20,25,30,35,40,45,50,75,100,250,500,750,1000
 #5,15,25,30,40,50,75,100,250,500,750,1000,1250,1500,1750,2000
-#5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000,5000
-# 5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000,5000,6000,7500,8500,10000
+#5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000
+#5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000,5000,6000,7500,8500,10000
 #0.01,0.05,0.06,0.07,0.08,0.09,0.1,0.11,.12,.13,.14,.15,.25,.5,1,2
 
-trees = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+trees = [5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000]
 l_rate = [0.1]
 
 def Accuracy_score(orig,pred):
-    orig = 10.0 ** orig
-    pred = 10.0 ** pred
-    MAPE = np.mean((np.abs(orig-pred))/orig)
-    return(MAPE)
+    numerator = np.abs(pred - orig)
+    denominator = (np.abs(orig) + np.abs(pred)) / 2
+    smape = np.mean(numerator / denominator)
+    return smape
 
 def Accuracy_score3(orig,pred):
     orig = 10 ** np.array(orig)
@@ -83,7 +98,7 @@ current_row = 0
 # Loop over depths and trees to fill the array
 for depth_idx, rate in enumerate(l_rate):
     for tree_idx, n_trees in enumerate(trees):
-        gbr = GradientBoostingRegressor(max_depth=n_trees,random_state=17,n_estimators=50,learning_rate=rate)
+        gbr = GradientBoostingRegressor(max_depth=1,random_state=17,n_estimators=n_trees,learning_rate=rate)
         
         cv_scores = RepeatedKFold(n_splits=5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(gbr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
@@ -111,12 +126,13 @@ for depth_idx, rate in enumerate(l_rate):
 #%% Export
 
 #MAPE
-# df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(cv_folds)])
+df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # A20
-df_metrics = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
+df_metricsA20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # 
 
-file_path = "C:/spydertest/csv/CumulRot.xlsx"
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='GBRa20', index_label='Depth')
+    df_metrics.to_excel(writer, sheet_name='GBR_SMAPE', index_label='Depth')
+    df_metricsA20.to_excel(writer, sheet_name='GBR_A20', index_label='Depth')

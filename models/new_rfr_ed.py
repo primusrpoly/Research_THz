@@ -53,10 +53,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 trees = [5,10,15,25,35,50,75,100,125,250,400,500,600,750,1000]
 
 def Accuracy_score(orig,pred):
-    orig = 10.0 ** orig
-    pred = 10.0 ** pred
-    MAPE = np.mean((np.abs(orig-pred))/orig)
-    return(MAPE)
+    numerator = np.abs(pred - orig)
+    denominator = (np.abs(orig) + np.abs(pred)) / 2
+    smape = np.mean(numerator / denominator) * 100
+    return smape
 
 def Accuracy_score3(orig,pred):
     orig = 10 ** np.array(orig)
@@ -93,7 +93,7 @@ current_row = 0
 for depth_idx, depth in enumerate(range(1, num_depths + 1)):
     for tree_idx, n_trees in enumerate(trees):
         start = time.time()
-        rfr = RandomForestRegressor(n_estimators=n_trees, random_state=17, max_depth=depth)
+        rfr = RandomForestRegressor(n_estimators=n_trees, random_state=8, max_depth=depth)
         
         cv_scores = RepeatedKFold(n_splits= 5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(rfr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
@@ -125,10 +125,11 @@ for depth_idx, depth in enumerate(range(1, num_depths + 1)):
 #MAPE
 df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # # A20
-#df_metrics = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
+df_metrics_A20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # 
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
     df_metrics.to_excel(writer, sheet_name='RFR_MAPE', index_label='Depth')
+    df_metrics_A20.to_excel(writer, sheet_name='RFR_A20', index_label='Depth')
 # %%
