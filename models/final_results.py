@@ -77,14 +77,14 @@ svr = SVR(kernel='rbf', C=1,epsilon=0.5)
 knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=10,random_state=17, criterion='squared_error')
 rfr = RandomForestRegressor(n_estimators=100, random_state=17, max_depth=7,max_features=2)
-gbr = GradientBoostingRegressor(max_depth= 3, random_state=17, n_estimators= 50, learning_rate= 0.1)
+gbr = GradientBoostingRegressor(max_depth=8, random_state=17, n_estimators=75, learning_rate= 0.1)
 abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=5000,learning_rate=0.5)
 # bag = BaggingRegressor(estimator=dtr,n_estimators=500)
 
 #%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 17)
-Accuracy_Values = cross_val_score(lnr, X, y, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(knn, X, y, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -97,7 +97,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values3 = cross_val_score(lnr,X ,y,\
+Accuracy_Values3 = cross_val_score(knn,X ,y,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -114,5 +114,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics_SMAPE.to_excel(writer, sheet_name='LNR_Final_SMAPE', index=False, startrow=0, startcol=0)
-    df_metrics_A20.to_excel(writer, sheet_name='LNR_Final_A20', index=False, startrow=0, startcol=0)
+    df_metrics_SMAPE.to_excel(writer, sheet_name='KNN_Final_SMAPE', index=False, startrow=0, startcol=0)
+    df_metrics_A20.to_excel(writer, sheet_name='KNN_Final_A20', index=False, startrow=0, startcol=0)

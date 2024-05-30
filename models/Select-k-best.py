@@ -85,14 +85,14 @@ svr = SVR(kernel='rbf', C=600,epsilon=0.25)
 knn = KNeighborsRegressor(n_neighbors=2, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=4,random_state=17, criterion='squared_error')
 rfr = RandomForestRegressor(n_estimators=250, random_state=17, max_depth=8,max_features=5)
-gbr = GradientBoostingRegressor(max_depth= 2, random_state=17, n_estimators= 1000, learning_rate= 0.15)
+gbr = GradientBoostingRegressor(max_depth=8, random_state=17, n_estimators=75, learning_rate= 0.1)
 abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=50,learning_rate=5)
 #bag = BaggingRegressor(estimator=dtr,n_estimators=500)
 
 #%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 8)
-Accuracy_Values = cross_val_score(lnr, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(gbr, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -108,7 +108,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 8)
-Accuracy_Values3 = cross_val_score(lnr,X_train,y_train,\
+Accuracy_Values3 = cross_val_score(gbr,X_train,y_train,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -125,6 +125,6 @@ df_selected_features = pd.DataFrame(selected_features.tolist()[::-1], columns=['
 
 #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='LNR_kBestAcc1', index=False, startrow=0, startcol=0)
-    df_selected_features.to_excel(writer, sheet_name='LNR_kBestSF1', index=False, startrow=0, startcol=0)
+    df_metrics.to_excel(writer, sheet_name='GBR_kBestAcc1', index=False, startrow=0, startcol=0)
+    #df_selected_features.to_excel(writer, sheet_name='GBR_kBestSF4', index=False, startrow=0, startcol=0)
 

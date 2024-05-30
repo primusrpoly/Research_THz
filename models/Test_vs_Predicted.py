@@ -53,20 +53,20 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 
 lnr = LinearRegression()
 svr = SVR(kernel='rbf', C=600,epsilon=0.25)
-knn = KNeighborsRegressor(n_neighbors=2, weights='distance')
+knn = KNeighborsRegressor(n_neighbors=4, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=4,random_state=17,criterion='squared_error')
 rfr = RandomForestRegressor(n_estimators=50, random_state=17, max_depth=8,max_features=5)
-gbr = GradientBoostingRegressor(max_depth= 3, random_state=17, n_estimators= 1000, learning_rate= 0.25)
+gbr = GradientBoostingRegressor(max_depth=4, random_state=17, n_estimators=75, learning_rate=0.08)
 abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=1000,learning_rate=0.5)
 #bag = BaggingRegressor(estimator=dtr,n_estimators=500)
 
 #%% Test and analysis
 
 # Train the model
-lnr.fit(X_train, y_train)
+knn.fit(X_train, y_train)
 
 # Make predictions
-y_pred = lnr.predict(X_test)
+y_pred = knn.predict(X_test)
 
 # y_test = 10 ** y_test 
 # y_pred = 10 ** y_pred 
@@ -130,5 +130,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # # Export to Excel
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    results_df.to_excel(writer, sheet_name='LNR_TvP', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='KNN4_TvP', index=False, startrow=0, startcol=0)
 # %%
