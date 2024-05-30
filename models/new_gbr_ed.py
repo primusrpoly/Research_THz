@@ -49,11 +49,12 @@ X = selector.fit_transform(X, y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
-#5,10,15,20,25,30,35,40,45,50,75,100,250,500,750,1000
+#trees: 5,10,15,20,25,30,35,40,45,50,75,100,250,500,750,1000
 #5,15,25,30,40,50,75,100,250,500,750,1000,1250,1500,1750,2000
-#5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000
+#estimators: 5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000
 #5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000,5000,6000,7500,8500,10000
-#0.01,0.05,0.06,0.07,0.08,0.09,0.1,0.11,.12,.13,.14,.15,.25,.5,1,2
+#learning rate: 0.01,0.05,0.06,0.07,0.08,0.09,0.1,0.11,.12,.13,.14,.15,.25,.5,1,2
+#depth: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 
 trees = [5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000]
 l_rate = [0.1]
@@ -98,7 +99,7 @@ current_row = 0
 # Loop over depths and trees to fill the array
 for depth_idx, rate in enumerate(l_rate):
     for tree_idx, n_trees in enumerate(trees):
-        gbr = GradientBoostingRegressor(max_depth=1,random_state=17,n_estimators=n_trees,learning_rate=rate)
+        gbr = GradientBoostingRegressor(max_depth=12,random_state=17,n_estimators=n_trees,learning_rate=rate)
         
         cv_scores = RepeatedKFold(n_splits=5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(gbr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
@@ -134,5 +135,6 @@ df_metricsA20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in ran
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='GBR_SMAPE', index_label='Depth')
-    df_metricsA20.to_excel(writer, sheet_name='GBR_A20', index_label='Depth')
+    df_metrics.to_excel(writer, sheet_name='GBR16_SMAPE_est', index_label='Depth')
+    df_metricsA20.to_excel(writer, sheet_name='GBR16_A20_est', index_label='Depth')
+# %%

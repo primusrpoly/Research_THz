@@ -27,7 +27,7 @@ mat_data = loadmat('All the Data.mat')
 
 array_data = mat_data['result_array']
 
-print(array_data)
+#print(array_data)
 
 column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
 
@@ -36,17 +36,16 @@ df = pd.DataFrame(array_data, columns=column_names)
 
 # Now you can access the columns by their names
 X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
-print("X:", X)
+#print("X:", X)
 y = df['BER']
-print("y:\n", y)
+#print("y:\n", y)
 
 #Normalize
 scaler = MinMaxScaler()
 X = scaler.fit_transform(X)
 
-selector = SelectKBest(f_regression, k=4)
+selector = SelectKBest(f_regression, k=2)
 X = selector.fit_transform(X, y)
-
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
 
@@ -55,7 +54,7 @@ trees = [5,10,15,25,35,50,75,100,125,250,400,500,600,750,1000]
 def Accuracy_score(orig,pred):
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator) * 100
+    smape = np.mean(numerator / denominator)
     return smape
 
 def Accuracy_score3(orig,pred):
@@ -92,8 +91,7 @@ current_row = 0
 # Loop over depths and trees to fill the array
 for depth_idx, depth in enumerate(range(1, num_depths + 1)):
     for tree_idx, n_trees in enumerate(trees):
-        start = time.time()
-        rfr = RandomForestRegressor(n_estimators=n_trees, random_state=8, max_depth=depth)
+        rfr = RandomForestRegressor(n_estimators=n_trees, random_state=17, max_depth=depth)
         
         cv_scores = RepeatedKFold(n_splits= 5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(rfr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
@@ -115,8 +113,6 @@ for depth_idx, depth in enumerate(range(1, num_depths + 1)):
         
         print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
         print('\nFinal Average Accuracy a_20 index of the model:', round(Accuracy_Values3.mean(),4))
-        print ('Time taken for trial {} is {} sec\n'.format(current_row,
-                                                        time.time()-start))
         
         all_cv_scores2[current_row, :] = Accuracy_Values3
         current_row += 1
@@ -130,6 +126,6 @@ df_metrics_A20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in ra
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='RFR_MAPE', index_label='Depth')
-    df_metrics_A20.to_excel(writer, sheet_name='RFR_A20', index_label='Depth')
+    df_metrics.to_excel(writer, sheet_name='RFR2_MAPE', index_label='Depth')
+    df_metrics_A20.to_excel(writer, sheet_name='RFR2_A20', index_label='Depth')
 # %%
