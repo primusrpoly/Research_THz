@@ -20,7 +20,7 @@ mat_data = loadmat('All the Data.mat')
 
 array_data = mat_data['result_array']
 
-print(array_data)
+#print(array_data)
 
 column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
 
@@ -40,17 +40,17 @@ X = scaler.fit_transform(X)
 selector = SelectKBest(f_regression, k=4)
 X = selector.fit_transform(X, y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
-#trees: 5,10,15,20,25,30,35,40,45,50,75,100,250,500,750,1000
-#5,15,25,30,40,50,75,100,250,500,750,1000,1250,1500,1750,2000
-#estimators: 5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000
-#5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000,5000,6000,7500,8500,10000
-#learning rate: 0.01,0.05,0.06,0.07,0.08,0.09,0.1,0.11,.12,.13,.14,.15,.25,.5,1,2
-#depth: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
+# [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.25]
+#0.01,0.05,0.1,0.25,0.5,0.75,1,2.5,5
+#1,5,10,15,20,25,30,35,40,45,50,75,100,250,500,1000
+# 95,96,97,98,99,100,101,102,103,104,105
+# 0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5
+# 0.25,0.5,0.75,1,5,10,15,20,25,30,35,40,45,50,75,100,250
 
-trees = [5,25,35,50,75,100,250,500,750,1000,1250,1750,2000,2500,3000]
-l_rate = [0.1]
+epi_values = [0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5]
+C_value = [1000]
 
 def Accuracy_score(orig,pred):
     numerator = np.abs(pred - orig)
@@ -69,7 +69,6 @@ def Accuracy_score3(orig,pred):
     a_20 = count/len(orig)
     return(a_20)
 
-
 #def Accuracy_score(orig, pred):
   #  orig = np.exp(orig)  # Convert original values back from log scale
   #  pred = np.exp(pred)  # Convert predicted values back from log scale
@@ -78,10 +77,11 @@ def Accuracy_score3(orig,pred):
 
 custom_Scoring = make_scorer(Accuracy_score,greater_is_better = True)
 
+
 #%% Training
 cv_folds = 15
-num_depths = len(trees)
-num_epi = len(l_rate)
+num_depths = len(C_value)
+num_epi = len(epi_values)
 
 rows = num_depths * num_epi
 
@@ -90,12 +90,12 @@ all_cv_scores2 = np.zeros((rows, cv_folds))
 current_row = 0
 
 # Loop over depths and trees to fill the array
-for depth_idx, rate in enumerate(l_rate):
-    for tree_idx, n_trees in enumerate(trees):
-        gbr = GradientBoostingRegressor(max_depth=12,random_state=17,n_estimators=n_trees,learning_rate=rate)
+for depth_idx, depth in enumerate(C_value):
+    for tree_idx, n_epi in enumerate(epi_values):
+        svr = SVR(kernel='rbf', C=depth, epsilon = n_epi)
         
         cv_scores = RepeatedKFold(n_splits=5, n_repeats=3, random_state=8)
-        Accuracy_Values = cross_val_score(gbr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
+        Accuracy_Values = cross_val_score(svr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
         
         print('Trial #:',current_row)
         print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
@@ -109,7 +109,7 @@ for depth_idx, rate in enumerate(l_rate):
 
         #Running cross validation
         CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 8)
-        Accuracy_Values3 = cross_val_score(gbr,X_train ,y_train,\
+        Accuracy_Values3 = cross_val_score(svr,X_train ,y_train,\
                                            cv=CV,scoring=custom_Scoring3)
         
         print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -117,17 +117,17 @@ for depth_idx, rate in enumerate(l_rate):
         
         all_cv_scores2[current_row, :] = Accuracy_Values3
         current_row += 1
+        
 #%% Export
 
 #MAPE
 df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(cv_folds)])
-# A20
-df_metricsA20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
-# 
+#A20
+df_metrics_A20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
+
 
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='GBR16_SMAPE_est', index_label='Depth')
-    df_metricsA20.to_excel(writer, sheet_name='GBR16_A20_est', index_label='Depth')
-# %%
+    df_metrics.to_excel(writer, sheet_name='SVR_epi2_SMAPE', index_label='Depth')
+    df_metrics_A20.to_excel(writer, sheet_name='SVR_epi2_A20', index_label='Depth')

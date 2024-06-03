@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 15 00:00:29 2024
-
-@author: kevry
-"""
-
 import numpy as np
 import pandas as pd
 import time
@@ -56,7 +49,7 @@ trial = 0
 def Accuracy_score(orig,pred):
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator) * 100
+    smape = np.mean(numerator / denominator)
     return smape
 
 def Accuracy_score3(orig,pred):

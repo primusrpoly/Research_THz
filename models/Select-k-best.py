@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr  5 12:54:25 2024
-
-@author: kevry
-"""
-
 import numpy as np
 import pandas as pd
 import time
@@ -83,16 +76,16 @@ custom_Scoring = make_scorer(Accuracy_score,greater_is_better = True)
 lnr = LinearRegression()
 svr = SVR(kernel='rbf', C=600,epsilon=0.25)
 knn = KNeighborsRegressor(n_neighbors=2, weights='distance')
-dtr = DecisionTreeRegressor(max_depth=4,random_state=17, criterion='squared_error')
-rfr = RandomForestRegressor(n_estimators=250, random_state=17, max_depth=8,max_features=5)
+dtr = DecisionTreeRegressor(max_depth=8,random_state=17, criterion='squared_error')
+rfr = RandomForestRegressor(n_estimators=35, random_state=17, max_depth=8,max_features=2)
 gbr = GradientBoostingRegressor(max_depth=8, random_state=17, n_estimators=75, learning_rate= 0.1)
-abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=50,learning_rate=5)
+abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_rate=0.01)
 #bag = BaggingRegressor(estimator=dtr,n_estimators=500)
 
 #%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 8)
-Accuracy_Values = cross_val_score(gbr, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(abr, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -108,7 +101,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 8)
-Accuracy_Values3 = cross_val_score(gbr,X_train,y_train,\
+Accuracy_Values3 = cross_val_score(abr,X_train,y_train,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -125,6 +118,6 @@ df_selected_features = pd.DataFrame(selected_features.tolist()[::-1], columns=['
 
 #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='GBR_kBestAcc1', index=False, startrow=0, startcol=0)
-    #df_selected_features.to_excel(writer, sheet_name='GBR_kBestSF4', index=False, startrow=0, startcol=0)
+    df_metrics.to_excel(writer, sheet_name='ABR_kBestAcc1', index=False, startrow=0, startcol=0)
+    #df_selected_features.to_excel(writer, sheet_name='ABR_kBestSF4', index=False, startrow=0, startcol=0)
 
