@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 25 13:06:02 2024
-
-@author: kevry
-"""
-
 import numpy as np
 import pandas as pd
 from scipy.io import loadmat
@@ -43,7 +36,7 @@ y = df['BER']
 scaler = MinMaxScaler()
 X = scaler.fit_transform(X)
 
-selector = SelectKBest(f_regression, k=4)
+selector = SelectKBest(f_regression, k=2)
 X = selector.fit_transform(X, y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
@@ -54,25 +47,25 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 lnr = LinearRegression()
 svr = SVR(kernel='rbf', C=600,epsilon=0.25)
 knn = KNeighborsRegressor(n_neighbors=4, weights='distance')
-dtr = DecisionTreeRegressor(max_depth=4,random_state=17,criterion='squared_error')
-rfr = RandomForestRegressor(n_estimators=50, random_state=17, max_depth=8,max_features=5)
-gbr = GradientBoostingRegressor(max_depth=4, random_state=17, n_estimators=75, learning_rate=0.08)
-abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=1000,learning_rate=0.5)
+dtr = DecisionTreeRegressor(max_depth=8,random_state=17,criterion='squared_error')
+rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=9,max_features=4)
+gbr = GradientBoostingRegressor(max_depth=5, random_state=17, n_estimators=75, learning_rate=0.1)
+abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_rate=0.01)
 #bag = BaggingRegressor(estimator=dtr,n_estimators=500)
 
 #%% Test and analysis
 
 # Train the model
-knn.fit(X_train, y_train)
+gbr.fit(X_train, y_train)
 
 # Make predictions
-y_pred = knn.predict(X_test)
+y_pred = gbr.predict(X_test)
 
 # y_test = 10 ** y_test 
 # y_pred = 10 ** y_pred 
 
-#RSME Calculations
-def rsm_error(actual, predicted):
+#RMSE Calculations
+def rms_error(actual, predicted):
     mse = np.mean((actual - predicted) ** 2)
     rmse = np.sqrt(mse)
     return rmse
@@ -102,7 +95,7 @@ mse = mean_squared_error(y_test, y_pred)
 mae = mean_absolute_error(y_test, y_pred)
 r2=r2_score(y_test,y_pred)
 mape=Accuracy_score(y_test, y_pred)
-rmse=rsm_error(y_test,y_pred)
+rmse=rms_error(y_test,y_pred)
 a_20 = Accuracy_score3(y_test,y_pred)
 
 #Print statements
@@ -130,5 +123,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # # Export to Excel
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    results_df.to_excel(writer, sheet_name='KNN4_TvP', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='ABR8_TvP', index=False, startrow=0, startcol=0)
 # %%
