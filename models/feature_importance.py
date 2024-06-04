@@ -86,14 +86,14 @@ with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
 #%% Correlation Coefficent
 
 
-# correlation_matrix = CumRot.corr()
+# correlation_matrix = Book1.corr()
 
 
 # print(correlation_matrix)
 
 
 # # To export this correlation matrix to an Excel file
-# file_path = "C:/spydertest/csv/ED_Data.xlsx"
+# file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
 #     correlation_matrix.to_excel(writer, sheet_name='Correlation', index=False, startrow=0, startcol=0)

@@ -56,10 +56,10 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_
 #%% Test and analysis
 
 # Train the model
-gbr.fit(X_train, y_train)
+abr.fit(X_train, y_train)
 
 # Make predictions
-y_pred = gbr.predict(X_test)
+y_pred = abr.predict(X_test)
 
 # y_test = 10 ** y_test 
 # y_pred = 10 ** y_pred 
@@ -123,5 +123,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 # # Export to Excel
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    results_df.to_excel(writer, sheet_name='ABR8_TvP', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='ABR8v2_TvP', index=False, startrow=0, startcol=0)
 # %%

@@ -77,7 +77,7 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_
 #%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 17)
-Accuracy_Values = cross_val_score(lnr, X, y, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(abr, X, y, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -90,7 +90,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values3 = cross_val_score(lnr,X ,y,\
+Accuracy_Values3 = cross_val_score(abr,X ,y,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
