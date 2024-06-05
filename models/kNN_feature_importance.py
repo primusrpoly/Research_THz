@@ -19,7 +19,7 @@ df = pd.DataFrame(array_data, columns=column_names)
 
 # Now you can access the columns by their names
 X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
-y = df['BER']
+y = df['OBER']
 
 # Normalize
 scaler = MinMaxScaler()
@@ -64,4 +64,4 @@ scaled_importances_df.insert(0, 'Feature', feature_importances_df['Feature'])
 # Export the DataFrame to an Excel file
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    scaled_importances_df.to_excel(writer, sheet_name='FeatureImportanceskNN', index=False)
+    scaled_importances_df.to_excel(writer, sheet_name='FeatureImportanceskNN2', index=False)

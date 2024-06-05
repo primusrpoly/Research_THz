@@ -51,7 +51,6 @@ dtr = DecisionTreeRegressor(max_depth=8,random_state=17,criterion='squared_error
 rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=9,max_features=4)
 gbr = GradientBoostingRegressor(max_depth=5, random_state=17, n_estimators=75, learning_rate=0.1)
 abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_rate=0.01)
-#bag = BaggingRegressor(estimator=dtr,n_estimators=500)
 
 #%% Test and analysis
 

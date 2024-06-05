@@ -48,10 +48,16 @@ a_20values = []
 
 #log base 10
 #log base 10 produces large mape, can produce numbers above 1 which doens't make sense
-def Accuracy_score(orig,pred):
+def transform_ber(ber):
+    return np.minimum(ber, 100 - ber)
+
+def Accuracy_score(orig, pred):
+    if orig.name == 'BER':  # Apply transformation only for BER
+        orig = transform_ber(orig)
+        pred = transform_ber(pred)
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator) * 100
+    smape = np.mean(numerator / denominator)
     return smape
 
 def Accuracy_score3(orig,pred):

@@ -54,7 +54,13 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 trees = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 l_rate = [0.01]
 
+def transform_ber(ber):
+    return np.minimum(ber, 100 - ber)
+
 def Accuracy_score(orig, pred):
+    if orig.name == 'BER':  # Apply transformation only for BER
+        orig = transform_ber(orig)
+        pred = transform_ber(pred)
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
     smape = np.mean(numerator / denominator)
