@@ -28,9 +28,9 @@ column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER'
 df = pd.DataFrame(array_data, columns=column_names)
 
 # Now you can access the columns by their names
-X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
+X = df[['PhaseNoise']]
 #print("X:", X)
-y = df['BER']
+y = df['PilotLength', 'PilotSpacing', 'SymbolRate', 'BER']
 #print("y:\n", y)
 
 #Normalize

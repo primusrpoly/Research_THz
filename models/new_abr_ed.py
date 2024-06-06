@@ -51,8 +51,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 #learning rate: 0.01,0.05,0.06,0.07,0.08,0.09,0.1,0.11,.12,.13,.14,.15,.25,.5,1,2
 #depth: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 
-trees = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-l_rate = [0.01]
+trees = [100]
+l_rate = [0.01,0.05,0.06,0.07,0.08,0.09,0.1,0.11,.12,.13,.14,.15,.25,.5,1,2]
 
 def transform_ber(ber):
     return np.minimum(ber, 100 - ber)
@@ -93,8 +93,8 @@ current_row = 0
 # Loop over depths and trees to fill the array
 for depth_idx, rate in enumerate(l_rate):
     for tree_idx, n_trees in enumerate(trees):
-        abr = AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=n_trees,random_state=17, criterion='squared_error'),
-                                n_estimators=500, learning_rate=rate, random_state=17)
+        abr = AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=8,random_state=17, criterion='squared_error'),
+                                n_estimators=100, learning_rate=rate, random_state=17)
         
         cv_scores = RepeatedKFold(n_splits=5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(abr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
@@ -128,5 +128,5 @@ df_metricsA20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in ran
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='ABR_SMAPE_depth', index_label='Depth')
-    df_metricsA20.to_excel(writer, sheet_name='ABR_A20_depth', index_label='Depth')
+    df_metrics.to_excel(writer, sheet_name='ABR_SMAPE_lr', index_label='Depth')
+    df_metricsA20.to_excel(writer, sheet_name='ABR_A20_lr', index_label='Depth')
