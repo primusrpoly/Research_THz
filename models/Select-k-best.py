@@ -81,7 +81,7 @@ rfr = RandomForestRegressor(n_estimators=35, random_state=17, max_depth=8,max_fe
 gbr = GradientBoostingRegressor(max_depth=8, random_state=17, n_estimators=75, learning_rate= 0.1)
 abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_rate=0.01)
 
-#%% SMAPE
+#%% MAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 8)
 Accuracy_Values = cross_val_score(knn, X_train, y_train, cv = cv_scores, scoring = custom_Scoring)
