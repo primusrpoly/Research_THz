@@ -11,6 +11,36 @@ from sklearn.ensemble import GradientBoostingRegressor, AdaBoostRegressor, Baggi
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import SelectKBest, f_regression
+
+import numpy as np
+
+def mape_exponential(expected, predicted):
+    """
+    Calculate the Mean Absolute Percentage Error (MAPE) using exponential values.
+    
+    Parameters:
+    expected (float): The expected value.
+    predicted (float): The predicted value.
+    
+    Returns:
+    float: The MAPE using exponential values.
+    """
+    if expected == 0:
+        return 0
+    exp_expected = np.exp(expected)
+    exp_predicted = np.exp(predicted)
+    mape = np.abs(exp_expected - exp_predicted) / np.abs(exp_expected)
+    return mape
+
+# Example usage
+expected_value = 49.3917465209961
+predicted_value = 49.2525100708008
+result = mape_exponential(expected_value, predicted_value)
+print(f"MAPE using exponential values: {result}")
+
+
+
+
 #%% Initialize
 mat_data = loadmat('All the Data.mat')
 
@@ -28,16 +58,12 @@ df = pd.DataFrame(array_data, columns=column_names)
 # Now you can access the columns by their names
 X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
 #print("X:", X)
-y = df['BER']
+y = df['OBER']
 #print("y:\n", y)
-
 
 #Normalize
 scaler = MinMaxScaler()
 X = scaler.fit_transform(X)
-
-selector = SelectKBest(f_regression, k=2)
-X = selector.fit_transform(X, y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
@@ -45,23 +71,19 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 #%% Regressors
 
 lnr = LinearRegression()
-svr = SVR(kernel='rbf', C=600,epsilon=0.25)
-knn = KNeighborsRegressor(n_neighbors=4, weights='distance')
-dtr = DecisionTreeRegressor(max_depth=8,random_state=17,criterion='squared_error')
-rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=9,max_features=4)
-gbr = GradientBoostingRegressor(max_depth=5, random_state=17, n_estimators=75, learning_rate=0.1)
-abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_rate=0.01)
+knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
+dtr = DecisionTreeRegressor(max_depth=13,random_state=17,criterion='squared_error')
+rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=12,max_features=4)
+gbr = GradientBoostingRegressor(max_depth=12, random_state=17, n_estimators=100, learning_rate=0.09)
+abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=35,learning_rate=0.15)
 
 #%% Test and analysis
 
 # Train the model
-abr.fit(X_train, y_train)
+rfr.fit(X_train, y_train)
 
 # Make predictions
-y_pred = abr.predict(X_test)
-
-# y_test = 10 ** y_test 
-# y_pred = 10 ** y_pred 
+y_pred = rfr.predict(X_test)
 
 #RMSE Calculations
 def rms_error(actual, predicted):
@@ -69,24 +91,47 @@ def rms_error(actual, predicted):
     rmse = np.sqrt(mse)
     return rmse
 
-#Smape calculations
-def Accuracy_score(orig,pred):
-    numerator = np.abs(pred - orig)
-    denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator)
-    return smape
+# def transform_ber(ber):
+#     return np.minimum(ber, 100 - ber)
 
-#a20 calculations
-def Accuracy_score3(orig,pred):
-    orig = 10 ** np.array(orig)
-    pred = 10 ** np.array(pred)
+# def Accuracy_score(orig, pred):
+#     orig = transform_ber(orig)
+#     pred = transform_ber(pred)
     
+#     numerator = np.abs(pred - orig)
+#     denominator = (np.abs(orig) + np.abs(pred)) / 2
+#     smape = np.mean(numerator / denominator)
+#     return smape
+
+# #a20 calculations
+# def Accuracy_score3(orig,pred):
+#     orig = np.array(orig)
+#     pred = np.array(pred)
+    
+#     count = 0
+#     for i in range(len(orig)):
+#         if(pred[i] <= 1.2*orig[i]) and (pred[i] >= 0.8*orig[i]):
+#             count = count +1
+#     a_20 = count/len(orig)
+#     return(a_20)
+
+def Accuracy_score(orig, pred):
+    exp_orig = np.exp(orig * 0.01)
+    exp_pred = np.exp(pred * 0.01)
+    
+    mape = np.abs(exp_orig - exp_pred) / np.abs(exp_orig)
+    return np.mean(mape) 
+
+def Accuracy_score3(orig,pred):
+    orig = np.array(orig)
+    pred = np.array(pred)
+
     count = 0
     for i in range(len(orig)):
-        if(pred[i] <= 1.2*orig[i]) and (pred[i] >= 0.8*orig[i]):
-            count = count +1
+        if(pred[i] <= 1.4*orig[i]) and (pred[i] >= 0.6*orig[i]):
+            count += 1
     a_20 = count/len(orig)
-    return(a_20)
+    return a_20
 
 #Statistical calculations
 #SHOULD BE TEST NOT TRAIN
@@ -111,16 +156,18 @@ print("A_20:", a_20)
 
 #%% Export to excel Actual vs expected
 
+X_test_df = pd.DataFrame(scaler.inverse_transform(X_test), columns=['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise'])
 
- ## Expected vs avtual dataframe
+# Expected vs actual dataframe
 results_df = pd.DataFrame({
-    'Expected/Test': y_test,
-    'Predicted': y_pred
+    'Expected/Test': y_test*.01,
+    'Predicted': y_pred*.01
 })
 
-file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/CBER.xlsx"
 
 # # Export to Excel
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    results_df.to_excel(writer, sheet_name='ABR8v2_TvP', index=False, startrow=0, startcol=0)
+    #X_test_df.to_excel(writer, sheet_name='RFR12_TvP_CBER3', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='RFR_TvP_CBER4', index=False, startrow=0, startcol=0)
 # %%

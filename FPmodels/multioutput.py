@@ -1,57 +1,60 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn import datasets
 from scipy.io import loadmat
 from sklearn.model_selection import train_test_split
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.linear_model import ElasticNet
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error
 
-#%% Initialize
+# Load the data
 mat_data = loadmat('All the Data.mat')
 array_data = mat_data['result_array']
+
+# Define column names
 column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
 
-# Convert the numpy array to a pandas DataFrame with the specified column names
+# Convert to DataFrame
 df = pd.DataFrame(array_data, columns=column_names)
 
-# One input variable and four target variables
+# Define features and targets
 X = df[['PhaseNoise']]
-y = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'BER']]
+y = df[['PilotLength', 'PilotSpacing', 'SymbolRate']]
 
-# Split the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=17)
+# Normalize features
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
 
-# Calculate the correlation matrix for the entire DataFrame
-correlation_matrix = df.corr()
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
-# Plot a heatmap of the correlation matrix
-plt.figure(figsize=(8, 6))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', linewidths=0.5)
-plt.title('Correlation Matrix')
-plt.show()
+# Define and train models
+models = {
+    'RandomForest': RandomForestRegressor(n_estimators=100, random_state=17),
+    'GradientBoosting': GradientBoostingRegressor(n_estimators=100, random_state=17),
+    'AdaBoost': AdaBoostRegressor(base_estimator=DecisionTreeRegressor(max_depth=8), n_estimators=100, learning_rate=0.01, random_state=17)
+}
 
-#%% Plots
-# Plot the distribution of the target variables
-plt.figure(figsize=(10, 4))
-plt.subplot(1, 3, 1)
-sns.histplot(df['PhaseNoise'], kde=True, color='green')
-plt.title('Distribution of PhaseNoise')
+# Train and evaluate models
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    print(f'{name} MSE: {mse}')
 
-plt.subplot(1, 3, 2)
-sns.histplot(df['BER'], kde=True, color='green')
-plt.title('Distribution of BER')
+# Predict for a given PhaseNoise value
+phase_noise_to_predict = np.array([[25]])
+phase_noise_to_predict_scaled = scaler.transform(phase_noise_to_predict)
 
-plt.subplot(1, 3, 3)
-sns.histplot(df['OBER'], kde=True, color='green')
-plt.title('Distribution of OBER')
+# Using the best model (e.g., GradientBoosting)
+best_model = models['GradientBoosting']
+predicted_values = best_model.predict(phase_noise_to_predict_scaled)
 
-plt.tight_layout()
-plt.show()
+predicted_symbol_rate = predicted_values[0][0]
+predicted_pilot_length = predicted_values[0][1]
+predicted_pilot_spacing = predicted_values[0][2]
 
-# %%
+print(f"\nPredicted values for PhaseNoise = {phase_noise_to_predict[0][0]}:")
+print(f"Predicted SymbolRate: {predicted_symbol_rate}")
+print(f"Predicted PilotLength: {predicted_pilot_length}")
+print(f"Predicted PilotSpacing: {predicted_pilot_spacing}")

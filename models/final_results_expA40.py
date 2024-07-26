@@ -23,66 +23,51 @@ array_data = mat_data['result_array']
 
 column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
 
-# Convert the numpy array to a pandas DataFrame with the specified column names
 df = pd.DataFrame(array_data, columns=column_names)
 
-# Now you can access the columns by their names
 X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
 #print("X:", X)
-y = df['BER']
+y = df['OBER']
 #print("y:\n", y)
 
 #Normalize
 scaler = MinMaxScaler()
 X = scaler.fit_transform(X)
 
-selector = SelectKBest(f_regression, k=4)
-X = selector.fit_transform(X, y)
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
 
-#log base 10
-#log base 10 produces large mape, can produce numbers above 1 which doens't make sense
-def transform_ber(ber):
-    return np.minimum(ber, 100 - ber)
-
 def Accuracy_score(orig, pred):
-    if orig.name == 'BER':  # Apply transformation only for BER
-        orig = transform_ber(orig)
-        pred = transform_ber(pred)
-    numerator = np.abs(pred - orig)
-    denominator = (np.abs(orig) + np.abs(pred)) / 2
-    smape = np.mean(numerator / denominator)
-    return smape
+    exp_orig = np.exp(orig * 0.01)
+    exp_pred = np.exp(pred * 0.01)
+    
+    mape = np.abs(exp_orig - exp_pred) / np.abs(exp_orig)
+    return np.mean(mape) 
 
 def Accuracy_score3(orig,pred):
-    orig = 10 ** np.array(orig)
-    pred = 10 ** np.array(pred)
-    
+    orig = np.array(orig)
+    pred = np.array(pred)
+
     count = 0
     for i in range(len(orig)):
-        if(pred[i] <= 1.2*orig[i]) and (pred[i] >= 0.8*orig[i]):
-            count = count +1
+        if(pred[i] <= 1.4*orig[i]) and (pred[i] >= 0.6*orig[i]):
+            count += 1
     a_20 = count/len(orig)
-    return(a_20)
-
-
+    return a_20
 
 custom_Scoring = make_scorer(Accuracy_score,greater_is_better = True)
 #%% Regressors
 
 lnr = LinearRegression()
-svr = SVR(kernel='rbf', C=1,epsilon=0.5)
 knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
-dtr = DecisionTreeRegressor(max_depth=8,random_state=17, criterion='squared_error')
-rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=9,max_features=4)
-gbr = GradientBoostingRegressor(max_depth=8, random_state=17, n_estimators=75, learning_rate= 0.1)
-abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=500,learning_rate=0.01)
+dtr = DecisionTreeRegressor(max_depth=13,random_state=17, criterion='squared_error')
+rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=12,max_features=4)
+gbr = GradientBoostingRegressor(max_depth=12, random_state=17, n_estimators=100, learning_rate= 0.09)
+abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=35,learning_rate=0.15)
 
 #%% SMAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 17)
-Accuracy_Values = cross_val_score(knn, X, y, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(abr, X, y, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -95,7 +80,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values3 = cross_val_score(knn,X ,y,\
+Accuracy_Values3 = cross_val_score(abr,X ,y,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -107,10 +92,10 @@ print('\nFinal Average Accuracy a_20 index of the model:', round(Accuracy_Values
 df_metrics_SMAPE = pd.DataFrame(Accuracy_Values, index=range(1, 16), columns=range(1, 2))   
 #A20
 df_metrics_A20 = pd.DataFrame(Accuracy_Values3, index=range(1, 16), columns=range(1, 2))   
-    
-file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
+
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/CBER.xlsx"
 
 # #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics_SMAPE.to_excel(writer, sheet_name='ABR_Final_SMAPE', index=False, startrow=0, startcol=0)
-    #df_metrics_A20.to_excel(writer, sheet_name='ABR_Final_A20', index=False, startrow=0, startcol=0)
+    #df_metrics_SMAPE.to_excel(writer, sheet_name='ABR_Final_SMAPE', index=False, startrow=0, startcol=0)
+    df_metrics_A20.to_excel(writer, sheet_name='ABR_Final_A40', index=False, startrow=0, startcol=0)

@@ -24,21 +24,16 @@ array_data = mat_data['result_array']
 
 column_names = ['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'OBER']
 
-# Convert the numpy array to a pandas DataFrame with the specified column names
 df = pd.DataFrame(array_data, columns=column_names)
 
-# Now you can access the columns by their names
-X = df[['PhaseNoise']]
+X = df[['PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise']]
 #print("X:", X)
-y = df['PilotLength', 'PilotSpacing', 'SymbolRate', 'BER']
+y = df['OBER']
 #print("y:\n", y)
 
 #Normalize
 scaler = MinMaxScaler()
 X = scaler.fit_transform(X)
-
-selector = SelectKBest(f_regression, k=1)
-X = selector.fit_transform(X, y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=8)
 
@@ -48,17 +43,17 @@ def transform_ber(ber):
     return np.minimum(ber, 100 - ber)
 
 def Accuracy_score(orig, pred):
-    if orig.name == 'BER':  # Apply transformation only for BER
-        orig = transform_ber(orig)
-        pred = transform_ber(pred)
+    orig = transform_ber(orig)
+    pred = transform_ber(pred)
+    
     numerator = np.abs(pred - orig)
     denominator = (np.abs(orig) + np.abs(pred)) / 2
     smape = np.mean(numerator / denominator)
     return smape
 
 def Accuracy_score3(orig,pred):
-    orig = 10 ** np.array(orig)
-    pred = 10 ** np.array(pred)
+    orig = np.array(orig)
+    pred = np.array(pred)
     
     count = 0
     for i in range(len(orig)):
@@ -122,9 +117,9 @@ df_metrics = pd.DataFrame(all_cv_scores, columns=[f'Fold {i+1}' for i in range(c
 # # A20
 df_metrics_A20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 # 
-file_path = "C:/Users/ryanj/Code/Research_THz/excel/Book1.xlsx"
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/CBER.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='RFR2_MAPE', index_label='Depth')
-    df_metrics_A20.to_excel(writer, sheet_name='RFR2_A20', index_label='Depth')
+    df_metrics.to_excel(writer, sheet_name='RFR_SMAPE', index_label='Depth')
+    df_metrics_A20.to_excel(writer, sheet_name='RFR_A20', index_label='Depth')
 # %%
