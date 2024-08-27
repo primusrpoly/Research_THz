@@ -49,7 +49,7 @@ def Accuracy_score3(orig,pred):
 
     count = 0
     for i in range(len(orig)):
-        if(pred[i] <= 1.4*orig[i]) and (pred[i] >= 0.6*orig[i]):
+        if(pred[i] <= 1.2*orig[i]) and (pred[i] >= 0.8*orig[i]):
             count += 1
     a_20 = count/len(orig)
     return a_20
@@ -67,7 +67,7 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=35,learning_r
 #%% SMAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 17)
-Accuracy_Values = cross_val_score(abr, X, y, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(knn, X, y, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -80,7 +80,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values3 = cross_val_score(abr,X ,y,\
+Accuracy_Values3 = cross_val_score(knn,X ,y,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -98,4 +98,4 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/CBER.xlsx"
 # #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
     #df_metrics_SMAPE.to_excel(writer, sheet_name='ABR_Final_SMAPE', index=False, startrow=0, startcol=0)
-    df_metrics_A20.to_excel(writer, sheet_name='ABR_Final_A40', index=False, startrow=0, startcol=0)
+    df_metrics_A20.to_excel(writer, sheet_name='knn_Final_A20', index=False, startrow=0, startcol=0)

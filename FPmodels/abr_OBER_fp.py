@@ -47,7 +47,7 @@ print(f'ABR A20: {a_20}')
 
 
 ### INPUT PHASE NOISE ###
-phase_noise_value = 35
+phase_noise_value = 0
 
 
 print(f"Finding optimal parameters for {phase_noise_value} GHz using ABR...")
