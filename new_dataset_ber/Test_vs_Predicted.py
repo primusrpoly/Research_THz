@@ -72,16 +72,16 @@ lnr = LinearRegression()
 knn = KNeighborsRegressor(n_neighbors=6, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=15,random_state=17,criterion='squared_error')
 rfr = RandomForestRegressor(n_estimators=250, random_state=17, max_depth=8)
-gbr = GradientBoostingRegressor(max_depth=4, random_state=17, n_estimators=100, learning_rate=0.1)
+gbr = GradientBoostingRegressor(max_depth=6, random_state=17, n_estimators=50, learning_rate=0.1)
 abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=250,learning_rate=0.1)
 
 #%% Test and analysis
 
 # Train the model
-abr.fit(X_train, y_train)
+gbr.fit(X_train, y_train)
 
 # Make predictions
-y_pred = abr.predict(X_test)
+y_pred = gbr.predict(X_test)
 #print(X_test)
 
 #RMSE Calculations
@@ -168,7 +168,7 @@ results_df = pd.DataFrame({
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/BERAgain.xlsx"
 
 # Export to Excel
-# with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-#     X_test_df.to_excel(writer, sheet_name='ABR_Features', index=False, startrow=0, startcol=0)
-#     results_df.to_excel(writer, sheet_name='ABR_TvP15', index=False, startrow=0, startcol=0)
+with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
+    #X_test_df.to_excel(writer, sheet_name='GBR_Features', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='GBR_TvP6', index=False, startrow=0, startcol=0)
 #%%

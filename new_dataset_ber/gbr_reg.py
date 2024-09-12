@@ -57,7 +57,7 @@ df = pd.DataFrame({
 #x and y split
 X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 #print("X:", X)
-y = df['CBER']
+y = df['BER']
 #print("y:\n", y)
 
 #Normalize
@@ -120,7 +120,7 @@ current_row = 0
 # Loop over depths and trees to fill the array
 for depth_idx, rate in enumerate(l_rate):
     for tree_idx, n_trees in enumerate(trees):
-        gbr = GradientBoostingRegressor(max_depth=n_trees,random_state=17,n_estimators=100,learning_rate=rate)
+        gbr = GradientBoostingRegressor(max_depth=n_trees,random_state=17,n_estimators=50,learning_rate=rate)
         
         cv_scores = RepeatedKFold(n_splits=5, n_repeats=3, random_state=8)
         Accuracy_Values = cross_val_score(gbr, X_train, y_train, cv=cv_scores, scoring=custom_Scoring)
@@ -166,7 +166,7 @@ df_metricsA20 = pd.DataFrame(all_cv_scores2, columns=[f'Fold {i+1}' for i in ran
 #MAE
 df_metrics_MAE = pd.DataFrame(all_cv_scores3, columns=[f'Fold {i+1}' for i in range(cv_folds)])
 
-file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/BERAgain.xlsx"
 
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
     df_metrics.to_excel(writer, sheet_name='GBR_SMAPE_depth', index_label='Depth')

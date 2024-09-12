@@ -57,7 +57,7 @@ df = pd.DataFrame({
 #x and y split
 X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 #print("X:", X)
-y = df['CBER']
+y = df['BER']
 #print("y:\n", y)
 
 # Normalize FOR kNN ONLY
@@ -80,17 +80,17 @@ GBR - estimators = 75, lr = 0.11, max_depth = 12
 
 knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=15, random_state=17)
-rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=15)
-gbr = GradientBoostingRegressor(max_depth=12, random_state=17, n_estimators=75, learning_rate=0.11)
-abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=25, learning_rate=1)
+rfr = RandomForestRegressor(n_estimators=250, random_state=17, max_depth=8)
+gbr = GradientBoostingRegressor(max_depth=6, random_state=17, n_estimators=50, learning_rate=0.1)
+abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=250, learning_rate=0.1)
 
 #%%Permutation Importance
 
 #PI Calculation
 for state in range(20):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=state)
-    gbr.fit(X_train, y_train)
-    result = permutation_importance(gbr, X_test, y_test, n_repeats=10, random_state=state)
+    rfr.fit(X_train, y_train)
+    result = permutation_importance(rfr, X_test, y_test, n_repeats=10, random_state=state)
     #summing to 1
     normalized_importances = result.importances_mean / np.sum(result.importances_mean)
     feature_importances_list.append(normalized_importances)
@@ -102,8 +102,8 @@ feature_importances_df.insert(0, 'Feature', feature_importances_df.index)
 feature_importances_df.reset_index(drop=True, inplace=True)
 
 #Export
-file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
+file_path = "C:/Users/ryanj/Code/Research_THz/excel/BERAgain.xlsx"
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    feature_importances_df.to_excel(writer, sheet_name='GBRPermutationImportances', index=False)
+    feature_importances_df.to_excel(writer, sheet_name='RFRPermutationImportances', index=False)
 
 

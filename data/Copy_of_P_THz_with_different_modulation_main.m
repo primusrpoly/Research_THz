@@ -4,12 +4,12 @@ close all;
 clear;
 
 %% Parameters
-symbol_rate = 65000000; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
-phase_noise = 35; %0:5:30; % -70 dBc/Hz + phase_noise, higher the value phase noise is higher
+symbol_rate = 20000000; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
+phase_noise = 5; %0:5:30; % -70 dBc/Hz + phase_noise, higher the value phase noise is higher
 M = 4; %[4, 8, 16, 32, 64, 128, 256, 512, 1024]; % Modulation order
-pilot_length = 2; % length of th pilot [2, 8, 16, 32, 64];
-symbols_between_pilot = 40; % number of symbols between the pilots [16, 64, 128, 256, 512, 1024];
-SNR_Value = 22.5; %0:5:50; % SNR considering AWGN noise
+pilot_length = 48; % length of th pilot [2, 8, 16, 32, 64];
+symbols_between_pilot = 1024; % number of symbols between the pilots [16, 64, 128, 256, 512, 1024];
+SNR_Value = 12.5; %0:5:50; % SNR considering AWGN noise
 N_symbol=1e5; % try for atleast 1e6
 Fc=120e9; % carrier frequency
 results_index=1;

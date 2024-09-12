@@ -53,7 +53,7 @@ df = pd.DataFrame({
 # Extract features (X) and target (y) variables
 X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 #print("X:", X)
-y = df['CBER']
+y = df['BER']
 #print("y:\n", y)
 
 
@@ -89,7 +89,7 @@ print(f'ABR A20: {a_20}')
 
 
 ### INPUT PHASE NOISE ###
-phase_noise_value = 50
+phase_noise_value = 5
 
 # ### Desired BER target ###
 # desired_ber_target = 0
