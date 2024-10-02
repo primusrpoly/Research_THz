@@ -55,7 +55,11 @@ df = pd.DataFrame({
 })
 
 #x and y split
-X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+# X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+# #print("X:", X)
+# y = df['CBER']
+# #print("y:\n", y)
+X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
 #print("X:", X)
 y = df['CBER']
 #print("y:\n", y)
@@ -82,21 +86,21 @@ knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=15, random_state=17)
 rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=15)
 gbr = GradientBoostingRegressor(max_depth=12, random_state=17, n_estimators=75, learning_rate=0.11)
-abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=25, learning_rate=1)
+abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=5, learning_rate=0.01)
 
 #%%Permutation Importance
 
 #PI Calculation
 for state in range(20):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=state)
-    gbr.fit(X_train, y_train)
-    result = permutation_importance(gbr, X_test, y_test, n_repeats=10, random_state=state)
+    abr.fit(X_train, y_train)
+    result = permutation_importance(abr, X_test, y_test, n_repeats=10, random_state=state)
     #summing to 1
     normalized_importances = result.importances_mean / np.sum(result.importances_mean)
     feature_importances_list.append(normalized_importances)
 
 #DataFrame for feature importances
-feature_importances_df = pd.DataFrame(feature_importances_list, columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']).transpose()
+feature_importances_df = pd.DataFrame(feature_importances_list, columns=['PhaseNoise', 'SymbolRate', 'SNR']).transpose()
 
 feature_importances_df.insert(0, 'Feature', feature_importances_df.index)
 feature_importances_df.reset_index(drop=True, inplace=True)
@@ -104,6 +108,6 @@ feature_importances_df.reset_index(drop=True, inplace=True)
 #Export
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    feature_importances_df.to_excel(writer, sheet_name='GBRPermutationImportances', index=False)
+    feature_importances_df.to_excel(writer, sheet_name='ABRPermutationImportances', index=False)
 
 

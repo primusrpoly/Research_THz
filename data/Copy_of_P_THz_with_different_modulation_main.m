@@ -4,15 +4,40 @@ close all;
 clear;
 
 %% Parameters
-symbol_rate = 20000000; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
+pilot_length = 2; % length of the pilot [2, 8, 16, 32, 64];
+symbols_between_pilot = 1024; % number of symbols between the pilots [16, 64, 128, 256, 512, 1024];
+symbol_rate = 1e6; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
+SNR_Value = 45; %0:5:50; % SNR considering AWGN noise
 phase_noise = 5; %0:5:30; % -70 dBc/Hz + phase_noise, higher the value phase noise is higher
 M = 4; %[4, 8, 16, 32, 64, 128, 256, 512, 1024]; % Modulation order
-pilot_length = 48; % length of th pilot [2, 8, 16, 32, 64];
-symbols_between_pilot = 1024; % number of symbols between the pilots [16, 64, 128, 256, 512, 1024];
-SNR_Value = 12.5; %0:5:50; % SNR considering AWGN noise
 N_symbol=1e5; % try for atleast 1e6
 Fc=120e9; % carrier frequency
 results_index=1;
+
+%should get 1e-04 to 1e-05
+%[5, 2.000000884519867, 1023.9971124558101, 300000675.7525711, 12.500013410679896]: 0.0
+%[5, 2.0, 1024, 300000676, 12.5]: 0.00224
+
+%[35, 6, 384, 30000020286, 12.5]: 0.00088915
+%[30, 6, 384, 30000009037, 12.5]: 0.00088915
+%[30, 2, 1024, 30000000316, 12.5]: 0.00348274
+%[25, 6, 384, 30000081885, 12.5]: 0.00088165
+%[25, 2, 1024, 30000000027, 12.5]: 0.00213748
+%[20, 6, 96, 30000006771, 12.5]: 0.0009447
+%[20, 2, 1024, 30000000051, 12.5]: 0.00118084
+%[15, 2, 1024, 30000000032, 12.5]: 0.00195312
+%[10, 2, 1024, 10000000003, 12.5]: 0.00215242
+%[5, 2, 1024, 1000000001, 12.5]: 0.00224709
+%[0, 2, 1024, 300000002, 12.5]: 0.00241151
+%[0, 2, 1024, 300000000, 10.0]: 0.00241151
+%
+%
+%[30, 2.0000371249447895, 767.9851837984826, 1000014496.5635185, 12.500148992765318]: 0.029934630102040817
+
+
+%[2, 1024, 30000000000, 15] -> 0 CBER for all PN
+
+
 
 %% Initialize a results array
 Results = struct( 'Modulation_order', [], 'SNR', [],'pilot_length', [], 'symbols_between_pilot', [], 'symbol_rate', [], 'phase_noise',[], 'BER', [], 'CBER', []);

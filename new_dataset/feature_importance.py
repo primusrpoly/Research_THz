@@ -54,7 +54,13 @@ df = pd.DataFrame({
 })
 
 #x and y split
-X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+# X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+# #print("X:", X)
+# y = df['CBER']
+# #print("y:\n", y)
+
+#x and y split
+X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
 #print("X:", X)
 y = df['CBER']
 #print("y:\n", y)
@@ -70,7 +76,6 @@ y = df['CBER']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 feature_importances_list = []
 
-
 #%% Regressors
 """
 kNN - k_neighbors = 1, weights = 'distance'				
@@ -83,7 +88,7 @@ knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
 dtr = DecisionTreeRegressor(max_depth=15, random_state=17)
 rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=15)
 gbr = GradientBoostingRegressor(max_depth=12, random_state=17, n_estimators=75, learning_rate=0.11)
-abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=25, learning_rate=1)
+abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=5, learning_rate=0.01)
 
 
 #%%FI
@@ -91,10 +96,10 @@ abr = AdaBoostRegressor(estimator=dtr, random_state=17, n_estimators=25, learnin
 # Calculation
 for state in range(20):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=state)
-    gbr.fit(X_train, y_train)
-    feature_importances_list.append(gbr.feature_importances_)
+    abr.fit(X_train, y_train)
+    feature_importances_list.append(abr.feature_importances_)
 
-feature_importances_df = pd.DataFrame(feature_importances_list, columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']).transpose()
+feature_importances_df = pd.DataFrame(feature_importances_list, columns=['PhaseNoise', 'SymbolRate', 'SNR']).transpose()
 
 feature_importances_df.insert(0, 'Feature', feature_importances_df.index)
 
@@ -103,7 +108,7 @@ feature_importances_df.reset_index(drop=True, inplace=True)
 #Export
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    feature_importances_df.to_excel(writer, sheet_name='GBRFeatureImportances', index=False)
+    feature_importances_df.to_excel(writer, sheet_name='ABRFeatureImportances', index=False)
     
 #%% Correlation Coefficent
 

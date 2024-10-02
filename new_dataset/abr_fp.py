@@ -10,10 +10,10 @@ from scipy.io import loadmat
 
 #%% Initilize
 
-# Load the .mat file
+# load
 mat_data = loadmat('full_Results.mat')
 
-# Extract the 'Results' struct
+# extract
 array_data = mat_data['Results']
 
 # Initialize lists to store each column of the DataFrame
@@ -26,7 +26,7 @@ phase_noise = []
 ber = []
 cber = []
 
-# Loop through each element in the struct array and extract the data
+# Loop through each element in array and extract data
 for result in array_data[0]:
     modulation_order.append(result['Modulation_order'][0][0])
     snr.append(result['SNR'][0][0])
@@ -37,7 +37,7 @@ for result in array_data[0]:
     ber.append(result['BER'][0][0])
     cber.append(result['CBER'][0][0])
 
-# Create a DataFrame from the extracted data
+#creating Dataframe
 column_names = ['ModulationOrder', 'SNR', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'PhaseNoise', 'BER', 'CBER']
 df = pd.DataFrame({
     'ModulationOrder': modulation_order,
@@ -50,12 +50,10 @@ df = pd.DataFrame({
     'CBER': cber
 })
 
-# Extract features (X) and target (y) variables
 X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 #print("X:", X)
 y = df['CBER']
 #print("y:\n", y)
-
 
 #Normalize
 # scaler = MinMaxScaler()
@@ -89,83 +87,115 @@ print(f'ABR A20: {a_20}')
 
 
 ### INPUT PHASE NOISE ###
-phase_noise_value = 50
+phase_noise_value = 15
 
 # ### Desired BER target ###
 # desired_ber_target = 0
 
-
 print(f"Finding optimal parameters for {phase_noise_value} GHz using ABR...")
 
-#Function to predict BER using trained regressor
-def predict_ber(params):
-    phase_noise, pilot_length, pilot_spacing, symbol_rate, snr = params
-    data = pd.DataFrame([[phase_noise, pilot_length, pilot_spacing, symbol_rate, snr]],
-                        columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR'])
-    prediction = abr.predict(data)[0]
-    #print(f"Predicted BER for params {params}: {prediction}")
-    return prediction
-
-##Penalties for PL, PS, SR
-
-#PL -> low as possible
-def penalty_pilot_length(pilot_length, min_length=2):
-    return (pilot_length - min_length) / min_length
-
-#PS -> high as possible
-def penalty_pilot_spacing(pilot_spacing, max_spacing=1024):
-    return (max_spacing - pilot_spacing) / max_spacing
-
-#SR -> low as possible
-def penalty_symbol_rate(symbol_rate, min_rate=1e6):
-    return (symbol_rate - min_rate) / min_rate
-
-#SNR -> low as possible
-def penalty_snr(snr, min_snr=1):
-    return (snr - min_snr) / min_snr
-
-#Minimizing all our parameters
-def combined_objective(params):
-    phase_noise, pilot_length, pilot_spacing, symbol_rate, snr = params
-    ber = predict_ber(params)
-    penalty = (penalty_pilot_length(pilot_length) +
-               penalty_pilot_spacing(pilot_spacing) +
-               penalty_symbol_rate(symbol_rate) +
-               penalty_snr(snr))
-    weight_ber = 2  #BER weight
-    weight_penalty = 0.00001 #penalty weight
-    return weight_ber * ber + weight_penalty * penalty
-
-    #penalty for BER deviation from the desired target
-    # ber_penalty = abs(ber - desired_ber_target)
-
-    # return weight_ber * ber_penalty + weight_penalty * penalty
-
-#Entire function for optimal parameters from a phase noise value
+#optimal parameters from a phase noise value
 def find_optimal_parameters(phase_noise_value):
-    # Bounds, phase noise is fixed
-    bounds = [(phase_noise_value, phase_noise_value), (2, 64), (16, 1024), (1e6, 3e10), (0, 50)]
+
+    def round_to_nearest_5(value):
+        return round(value * 2) / 2
     
-    #Differential evolution
+    # symbol_rate_min based on phasenoise_value
+    if 0 <= phase_noise_value < 5:
+        symbol_rate_min = 300e6
+    elif 5 <= phase_noise_value < 10:
+        symbol_rate_min = 1e9
+    elif 10 <= phase_noise_value < 15:
+        symbol_rate_min = 10e9
+    else:
+        symbol_rate_min = 30e9
+    symbol_rate_max = 40e9
+
+    if 0 <= phase_noise_value < 15:
+        snr_min = snr_max = 12.5  # Fixed at 12.5
+    else:
+        snr_min = 12.5
+        snr_max = 12.5
+    
+    #vpenalty functions 
+    def penalty_pilot_length(pilot_length, min_length=2):
+        return (pilot_length - min_length) / min_length
+    
+    def penalty_pilot_spacing(pilot_spacing, max_spacing=1024):
+        return (max_spacing - pilot_spacing) / max_spacing
+    
+    def penalty_symbol_rate(symbol_rate):
+        return (symbol_rate - symbol_rate_min) / symbol_rate_min
+    
+    def penalty_snr(snr):
+        return (snr - snr_min) / snr_min
+    
+    # predict BER using abr 
+    def predict_ber(params):
+        phase_noise, pilot_length, pilot_spacing, symbol_rate, snr = params
+        data = pd.DataFrame([[phase_noise, pilot_length, pilot_spacing, symbol_rate, snr]],
+                            columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR'])
+        prediction = abr.predict(data)[0]
+
+        # Round BER to the nearest 10e-6 and set to 0 if it's below 10e-7
+        if prediction < 1e-9:
+            prediction = 0
+        else:
+            prediction = round(prediction, 8)
+        
+        print(f"Predicted BER for params {params}: {prediction}")
+        return prediction
+    
+    # combined objective function
+    def combined_objective(params):
+        phase_noise, pilot_length, pilot_spacing, symbol_rate, snr = params
+        ber = predict_ber(params)
+        penalty = (penalty_pilot_length(pilot_length) +
+                   penalty_pilot_spacing(pilot_spacing) +
+                   penalty_symbol_rate(symbol_rate) +
+                   penalty_snr(snr))
+        weight_ber = 2  # BER weight
+        weight_penalty = 0.1  # Penalty weight
+        return weight_ber * ber + weight_penalty * penalty
+
+    # bounds, phase noise is fixed
+    bounds = [
+        (phase_noise_value, phase_noise_value),
+        (2, 64),  # PL
+        (16, 1024),  # PS
+        (symbol_rate_min, symbol_rate_max),  # SR
+        (snr_min, snr_max)  # SNR
+    ]
+    
+    # differential evolution
     def de_objective(params):
-        params = [phase_noise_value] + list(params)
-        return combined_objective(params)
+        rounded_params = [
+            round(params[0]),                   # Pilot Length (integer)
+            round(params[1]),                   # Pilot Spacing (integer)
+            round(params[2]),                   # Symbol Rate (integer)
+            round_to_nearest_5(params[3])       # SNR (set to 12.5)
+        ]
+        return combined_objective([phase_noise_value] + rounded_params)
     
-    #Optimization using differential evolution
-    result = differential_evolution(de_objective, bounds[1:], strategy='best1bin', maxiter=1000, tol=1e-7)
+    # optimization using differential evolution
+    result = differential_evolution(
+        de_objective, bounds[1:], strategy='best1bin', maxiter=100, popsize=5, tol=1e-6
+    )
     optimal_pilot_length, optimal_pilot_spacing, optimal_symbol_rate, optimal_snr = result.x
-    
-    #BER after optimizing
-    final_ber = predict_ber([phase_noise_value, optimal_pilot_length, optimal_pilot_spacing, optimal_symbol_rate, optimal_snr])
+
+    # BER after optimizing
+    final_ber = predict_ber([
+        phase_noise_value, round(optimal_pilot_length), round(optimal_pilot_spacing), 
+        round(optimal_symbol_rate), round_to_nearest_5(optimal_snr)
+    ])
     print(f"Final BER: {final_ber}")
 
-    return optimal_pilot_length, optimal_pilot_spacing, optimal_symbol_rate, optimal_snr
+    return round(optimal_pilot_length), round(optimal_pilot_spacing), round(optimal_symbol_rate), round_to_nearest_5(optimal_snr)
 
-#Print
+# print optimal parameters
 optimal_pilot_length, optimal_pilot_spacing, optimal_symbol_rate, optimal_snr = find_optimal_parameters(phase_noise_value)
 
 print(f"Optimal Pilot Length: {optimal_pilot_length}")
 print(f"Optimal Pilot Spacing: {optimal_pilot_spacing}")
 print(f"Optimal Symbol Rate: {optimal_symbol_rate}")
 print(f"Optimal SNR: {optimal_snr}")
-

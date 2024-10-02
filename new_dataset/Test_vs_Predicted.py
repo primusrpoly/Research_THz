@@ -54,10 +54,17 @@ df = pd.DataFrame({
 })
 
 #x and y split
-X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+# X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+# #print("X:", X)
+# y = df['CBER']
+# #print("y:\n", y)
+
+#x and y split
+X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
 #print("X:", X)
 y = df['CBER']
 #print("y:\n", y)
+
 
 #Normalize for kNN ONLY
 # scaler = MinMaxScaler()
@@ -70,10 +77,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 
 lnr = LinearRegression()
 knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
-dtr = DecisionTreeRegressor(max_depth=13,random_state=17,criterion='squared_error')
+dtr = DecisionTreeRegressor(max_depth=12,random_state=17,criterion='squared_error')
 rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=15)
 gbr = GradientBoostingRegressor(max_depth=4, random_state=17, n_estimators=100, learning_rate=0.1)
-abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=25,learning_rate=1)
+abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=5,learning_rate=0.01)
 
 #%% Test and analysis
 
@@ -90,46 +97,28 @@ def rms_error(actual, predicted):
     rmse = np.sqrt(mse)
     return rmse
 
-# def transform_ber(ber):
-#     return np.minimum(ber, 100 - ber)
-
-# def Accuracy_score(orig, pred):
-#     orig = transform_ber(orig)
-#     pred = transform_ber(pred)
+def transform_ber(ber):
+    return np.minimum(ber, 1 - ber)
     
-#     numerator = np.abs(pred - orig)
-#     denominator = (np.abs(orig) + np.abs(pred)) / 2
-#     smape = np.mean(numerator / denominator)
-#     return smape
-
-# #a20 calculations
-# def Accuracy_score3(orig,pred):
-#     orig = np.array(orig)
-#     pred = np.array(pred)
-    
-#     count = 0
-#     for i in range(len(orig)):
-#         if(pred[i] <= 1.2*orig[i]) and (pred[i] >= 0.8*orig[i]):
-#             count = count +1
-#     a_20 = count/len(orig)
-#     return(a_20)
-
 def Accuracy_score(orig, pred):
+    orig = transform_ber(orig)
+    pred = transform_ber(pred)
+    
     exp_orig = np.exp(orig)
     exp_pred = np.exp(pred)
     
     mape = np.abs(exp_orig - exp_pred) / np.abs(exp_orig)
     return np.mean(mape) 
 
-def Accuracy_score3(orig,pred):
+def Accuracy_score3(orig, pred):
     orig = np.array(orig)
     pred = np.array(pred)
-
+    
     count = 0
     for i in range(len(orig)):
-        if(pred[i] <= 1.4*orig[i]) and (pred[i] >= 0.6*orig[i]):
+        if(pred[i] <= 1.2 * orig[i]) and (pred[i] >= 0.8 * orig[i]):
             count += 1
-    a_20 = count/len(orig)
+    a_20 = count / len(orig)
     return a_20
 
 #Statistical calculations
@@ -156,7 +145,7 @@ print("A_20:", a_20)
 #%% Export to excel Actual vs expected
 
 #knn_X_test_df = pd.DataFrame(scaler.inverse_transform(X_test), columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR'])
-X_test_df = pd.DataFrame((X_test), columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR'])
+X_test_df = pd.DataFrame((X_test), columns=['PhaseNoise', 'SymbolRate', 'SNR'])
 
 
 # Expected vs actual dataframe
@@ -167,8 +156,8 @@ results_df = pd.DataFrame({
 
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 
-# # Export to Excel
-# with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-#     #X_test_df.to_excel(writer, sheet_name='GBR_Features', index=False, startrow=0, startcol=0)
-#     results_df.to_excel(writer, sheet_name='GBR_TvP8', index=False, startrow=0, startcol=0)
-# # %%
+# Export to Excel
+with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
+    #X_test_df.to_excel(writer, sheet_name='ABR_Features', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='ABR_TvP12', index=False, startrow=0, startcol=0)
+# %%
