@@ -12,7 +12,7 @@ All necessary files have been added to the repository (10/29/2024)
 Copying the repository is the only step needed to reproduce study on a local machine.
 
 ## Data Preparation
-All data used in our code pulled from a MATLAB file titled 'full_Results.mat', which is found in every folder with Python code.
+All data used in our code is pulled from a MATLAB file titled 'full_Results.mat', which is found in every folder with Python code.
 
 ## File Structure
 **data** - Hosts all MATLAB files for data storage, manipulation, and transformation
