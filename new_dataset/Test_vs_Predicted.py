@@ -156,7 +156,7 @@ results_df = pd.DataFrame({
 
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 
-# Export to Excel
+# Export
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
     #X_test_df.to_excel(writer, sheet_name='ABR_Features', index=False, startrow=0, startcol=0)
     results_df.to_excel(writer, sheet_name='ABR_TvP12', index=False, startrow=0, startcol=0)

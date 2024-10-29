@@ -3,21 +3,23 @@ clc;
 close all;
 clear;
 
+load('SNR_and_SR.mat');
 %% Parameters
 pilot_length = 2; % length of the pilot [2, 8, 16, 32, 64];
 symbols_between_pilot = 1024; % number of symbols between the pilots [16, 64, 128, 256, 512, 1024];
-symbol_rate = 1e6; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
-SNR_Value = 45; %0:5:50; % SNR considering AWGN noise
-phase_noise = 5; %0:5:30; % -70 dBc/Hz + phase_noise, higher the value phase noise is higher
+symbol_rate = SR; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
+SNR_Value = SNR; %0:5:50; % SNR considering AWGN noise
+phase_noise = 30; %0:5:30; % -70 dBc/Hz + phase_noise, higher the value phase noise is higher
 M = 4; %[4, 8, 16, 32, 64, 128, 256, 512, 1024]; % Modulation order
-N_symbol=1e5; % try for atleast 1e6
+N_symbol=1e5; % try for atleast 1e6, how many symbols do we check the error over 
 Fc=120e9; % carrier frequency
 results_index=1;
 
 %should get 1e-04 to 1e-05
+%[0, 2, 1024, 29999999976, 12.5]: 0.00191825
 %[5, 2.000000884519867, 1023.9971124558101, 300000675.7525711, 12.500013410679896]: 0.0
 %[5, 2.0, 1024, 300000676, 12.5]: 0.00224
-
+%29999999993
 %[35, 6, 384, 30000020286, 12.5]: 0.00088915
 %[30, 6, 384, 30000009037, 12.5]: 0.00088915
 %[30, 2, 1024, 30000000316, 12.5]: 0.00348274
@@ -217,3 +219,4 @@ for im = 1:length(M) % loop for Modulation order
 end
 
 save("newfull_Results.mat","Results")
+

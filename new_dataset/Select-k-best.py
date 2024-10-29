@@ -132,13 +132,13 @@ print('\nFinal Average Accuracy a_20 index of the model:', round(Accuracy_Values
 
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 
-# DataFrame for accuracy values
+#accuracy df
 df_metrics = pd.DataFrame(Accuracy_Values3, index=range(1, len(Accuracy_Values3) + 1), columns=['Accuracy'])
 
-# Reverse the selected features list if it's in descending order
+#descending order
 df_selected_features = pd.DataFrame(selected_features.tolist()[::-1], columns=['Selected Features'])
 
-#Export the DataFrame to an Excel file on a specific sheet
+#Export
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
     df_metrics.to_excel(writer, sheet_name='ABR_kBestAcc5', index=False, startrow=0, startcol=0)
     df_selected_features.to_excel(writer, sheet_name='ABR_kBestSF5', index=False, startrow=0, startcol=0)
