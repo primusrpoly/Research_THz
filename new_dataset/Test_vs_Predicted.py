@@ -54,10 +54,10 @@ df = pd.DataFrame({
 })
 
 #x and y split
-# X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
-# #print("X:", X)
-# y = df['CBER']
-# #print("y:\n", y)
+X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
+#print("X:", X)
+y = df['CBER']
+#print("y:\n", y)
 
 #x and y split
 X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
@@ -65,6 +65,10 @@ X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
 y = df['CBER']
 #print("y:\n", y)
 
+# k = 3
+
+# selector = SelectKBest(f_regression, k=k)
+# X_new = selector.fit_transform(X, y) 
 
 #Normalize for kNN ONLY
 # scaler = MinMaxScaler()
@@ -77,10 +81,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 
 lnr = LinearRegression()
 knn = KNeighborsRegressor(n_neighbors=1, weights='distance')
-dtr = DecisionTreeRegressor(max_depth=12,random_state=17,criterion='squared_error')
+dtr = DecisionTreeRegressor(max_depth=15,random_state=17,criterion='squared_error')
 rfr = RandomForestRegressor(n_estimators=5, random_state=17, max_depth=15)
 gbr = GradientBoostingRegressor(max_depth=4, random_state=17, n_estimators=100, learning_rate=0.1)
-abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=5,learning_rate=0.01)
+abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=25,learning_rate=1)
 
 #%% Test and analysis
 
@@ -145,7 +149,7 @@ print("A_20:", a_20)
 #%% Export to excel Actual vs expected
 
 #knn_X_test_df = pd.DataFrame(scaler.inverse_transform(X_test), columns=['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR'])
-X_test_df = pd.DataFrame((X_test), columns=['PhaseNoise', 'SymbolRate', 'SNR'])
+#X_test_df = pd.DataFrame((X_test), columns=['PhaseNoise', 'SymbolRate', 'SNR'])
 
 
 # Expected vs actual dataframe
@@ -159,5 +163,5 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 # Export
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
     #X_test_df.to_excel(writer, sheet_name='ABR_Features', index=False, startrow=0, startcol=0)
-    results_df.to_excel(writer, sheet_name='ABR_TvP12', index=False, startrow=0, startcol=0)
+    results_df.to_excel(writer, sheet_name='ABR_TvPkbest', index=False, startrow=0, startcol=0)
 # %%

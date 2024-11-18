@@ -54,16 +54,21 @@ df = pd.DataFrame({
 })
 
 #x and y split
-X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
+X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 #print("X:", X)
 y = df['CBER']
 #print("y:\n", y)
+
+k = 3
+
+selector = SelectKBest(f_regression, k=k)
+X_new = selector.fit_transform(X, y) 
 
 #Normalize FOR kNN ONLY
 # scaler = MinMaxScaler()
 # X = scaler.fit_transform(X)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
+X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.3, random_state=17)
 
 def Accuracy_score(orig, pred):
     exp_orig = np.exp(orig)
@@ -96,7 +101,7 @@ abr = AdaBoostRegressor(estimator=dtr,random_state=17,n_estimators=25,learning_r
 #%% SMAPE
 
 cv_scores = RepeatedKFold(n_splits=5, n_repeats = 3, random_state = 17)
-Accuracy_Values = cross_val_score(abr, X, y, cv = cv_scores, scoring = custom_Scoring)
+Accuracy_Values = cross_val_score(abr, X_new, y, cv = cv_scores, scoring = custom_Scoring)
 
 print('\nAccuracy values for k-fold Cross Validation:\n', Accuracy_Values)
 print('\nFinal Average Accuracy of the model:', round(Accuracy_Values.mean(), 2))
@@ -109,7 +114,7 @@ custom_Scoring3 = make_scorer(Accuracy_score3,greater_is_better=True)
 
 #Running cross validation
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values3 = cross_val_score(abr,X ,y,\
+Accuracy_Values3 = cross_val_score(abr,X_new ,y,\
                                    cv=CV,scoring=custom_Scoring3)
 
 print('\n"a_20 index" for 5-fold Cross Validation:\n', Accuracy_Values3)
@@ -119,7 +124,7 @@ print('\nFinal Average Accuracy a_20 index of the model:', round(Accuracy_Values
 custom_Scoring5 = make_scorer(mean_absolute_error, greater_is_better=True)
 
 CV = RepeatedKFold(n_splits = 5, n_repeats=3, random_state = 17)
-Accuracy_Values5 = cross_val_score(abr,X ,y,\
+Accuracy_Values5 = cross_val_score(abr,X_new ,y,\
                                    cv=CV,scoring=custom_Scoring5)
 
 print('\n"MAE" for 5-fold Cross Validation:\n', Accuracy_Values5)
@@ -139,6 +144,6 @@ file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 
 #Export the DataFrame to an Excel file on a specific sheet
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics_SMAPE.to_excel(writer, sheet_name='abr15_Final_SMAPE', index=False, startrow=0, startcol=0)
-    df_metrics_A20.to_excel(writer, sheet_name='abr15_Final_A20', index=False, startrow=0, startcol=0)
-    df_metrics_MAE.to_excel(writer, sheet_name='abr15_Final_MAE', index=False, startrow=0, startcol=0)
+    df_metrics_SMAPE.to_excel(writer, sheet_name='abr15kb_Final_SMAPE', index=False, startrow=0, startcol=0)
+    df_metrics_A20.to_excel(writer, sheet_name='abr15kb_Final_A20', index=False, startrow=0, startcol=0)
+    df_metrics_MAE.to_excel(writer, sheet_name='abr15kb_Final_MAE', index=False, startrow=0, startcol=0)
