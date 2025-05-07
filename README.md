@@ -2,11 +2,10 @@
 
 ## Introduction
 This repository is prepared to provide the Python code for:
-
-Paper to be submitted
+Modeling the Impact of Phase Noise in THz Communications Through Machine Learning: An Approach for Efficient Waveform Design
 
 ## Latest Updates
-All necessary files have been added to the repository (10/29/2024)
+All necessary files have been added to the repository (05/07/2025)
 
 ## Installation
 Copying the repository is the only step needed to reproduce study on a local machine.
