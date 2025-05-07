@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.io import loadmat
+import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
@@ -52,19 +53,12 @@ X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 #print("X:", X)
 y = df['CBER']
 
-k = 5
-selector = SelectKBest(f_regression, k=k)
-X_new = selector.fit_transform(X, y)
-
-#Get the selected feature names for correct alignment
-selected_features = X.columns[selector.get_support()]
-
 abr = AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=15,random_state=17, criterion='squared_error'),
                                 n_estimators=25, learning_rate=1, random_state=17)
 
-abr.fit(X_new, y)
+abr.fit(X, y)
 
-y_pred = abr.predict(X_new)
+y_pred = abr.predict(X)
 
 def Accuracy_score3(orig, pred):
     orig = np.array(orig)
@@ -128,28 +122,22 @@ df['Predicted BER'] = y_pred
 # cbar.set_label('SNR')
 # plt.show()
 
-plt.ion()
-print(plt.get_backend())
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111, projection='3d')
-
-# Scatter plot with a reduced color bar size
 sc = ax.scatter(df['PhaseNoise'], df['SymbolRate'], df['SNR'], c=df['CBER'], cmap='coolwarm')
-
-# Set axis labels
 ax.set_xlabel('Phase Noise')
 ax.set_ylabel('Symbol Rate')
 ax.set_zlabel('SNR')
-
-# Adjust layout to minimize whitespace
-plt.tight_layout()
-
-# Add color bar and shrink its size
-cbar = plt.colorbar(sc, pad=0.1, shrink=0.8)
-cbar.set_label('BER')
-
-# Save the figure with adjusted bounding box to fit Overleaf usage
-#plt.savefig('3d_plot_adjusted.png', bbox_inches='tight', dpi=300)
-
+# print("labels")
+# plt.tight_layout()
+# cbar = plt.colorbar(sc, pad=0.1, shrink=0.8)
+# cbar.set_label('BER')
+# print("color bar")
 plt.show(block=True)
+print("nonononS")
+plt.close()
+print("not showing")
+plt.savefig('C:/Users/ryanj/Code/Research_THz/new_dataset/viz/3d_plot.png', bbox_inches='tight', dpi=300)
+
+
 

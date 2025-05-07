@@ -64,9 +64,8 @@ k = 3
 selector = SelectKBest(f_regression, k=k)
 X_new = selector.fit_transform(X, y) 
 
-#Normalize FOR kNN ONLY
-# scaler = MinMaxScaler()
-# X = scaler.fit_transform(X)
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.3, random_state=17)
 

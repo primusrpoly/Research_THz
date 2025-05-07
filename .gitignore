@@ -1,2 +1,6 @@
 excel/~$Book1.xlsx
 .Rproj.user
+*.pkl
+*.fig
+*.asv
+

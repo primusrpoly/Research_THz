@@ -11,7 +11,7 @@ from sklearn.svm import SVR
 from sklearn.ensemble import GradientBoostingRegressor, AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.feature_selection import SelectKBest, f_regression, mutual_info_regression
 
 #%% Initilize
 #load
@@ -60,9 +60,9 @@ X = df[['PhaseNoise', 'PilotLength', 'PilotSpacing', 'SymbolRate', 'SNR']]
 y = df['CBER']
 #print("y:\n", y)
 
-k = 5
+k = 1
 
-selector = SelectKBest(f_regression, k=k)
+selector = SelectKBest(mutual_info_regression, k=k)
 X_new = selector.fit_transform(X, y) 
 
 # print(f"Selected features for k={k}: {selected_features[::-1].tolist()}")
@@ -140,6 +140,6 @@ df_selected_features = pd.DataFrame(selected_features.tolist()[::-1], columns=['
 
 #Export
 with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    df_metrics.to_excel(writer, sheet_name='ABR_kBestAcc5', index=False, startrow=0, startcol=0)
-    df_selected_features.to_excel(writer, sheet_name='ABR_kBestSF5', index=False, startrow=0, startcol=0)
+    df_metrics.to_excel(writer, sheet_name='ABRkBestAcc1', index=False, startrow=0, startcol=0)
+    df_selected_features.to_excel(writer, sheet_name='ABRkBestSF1', index=False, startrow=0, startcol=0)
 

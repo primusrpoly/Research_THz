@@ -65,9 +65,9 @@ X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
 y = df['CBER']
 #print("y:\n", y)
 
-# Normalize FOR kNN ONLY
-# scaler = StandardScaler()
-# X = scaler.fit_transform(X)
+# Normalize
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
 
 # selector = SelectKBest(f_regression, k=4)
 # X_new = selector.fit_transform(X, y)

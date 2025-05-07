@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error
 from scipy.optimize import differential_evolution
 from scipy.io import loadmat
@@ -53,8 +54,8 @@ y = df['CBER']
 #print("y:\n", y)
 
 #Normalize
-# scaler = MinMaxScaler()
-# X = scaler.fit_transform(X)
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 

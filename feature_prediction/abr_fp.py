@@ -56,8 +56,8 @@ y = df['CBER']
 #print("y:\n", y)
 
 #Normalize
-# scaler = MinMaxScaler()
-# X = scaler.fit_transform(X)
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
@@ -102,13 +102,13 @@ def find_optimal_parameters(phase_noise_value):
     
     # symbol_rate_min based on phasenoise_value
     if 0 <= phase_noise_value < 5:
-        symbol_rate_max = 300e6
+        symbol_rate_max = 1e7
     elif 5 <= phase_noise_value < 10:
         symbol_rate_max = 1e8
     elif 10 <= phase_noise_value < 15:
-        symbol_rate_max = 10e8
+        symbol_rate_max = 1e9
     else:
-        symbol_rate_max = 40e9
+        symbol_rate_max = 3e10
     symbol_rate_min = 10e6
 
     if 0 <= phase_noise_value < 15:

@@ -3,13 +3,13 @@ clc;
 close all;
 clear;
 
-load('SNR_and_SR.mat');
-SNR_reshape = reshape(SNR, 1, []);
+load('SNR_and_SR.mat')
+
 %% Parameters
 pilot_length = 2; % length of the pilot [2, 8, 16, 32, 64];
 symbols_between_pilot = 1024; % number of symbols between the pilots [16, 64, 128, 256, 512, 1024];
 symbol_rate = SR; %[1e6, 10e6, 30e6, 100e6, 300e6, 1e9, 10e9, 30e9]; % [Hz]
-SNR_Value = SNR_reshape; %0:5:50; % SNR considering AWGN noise
+SNR_Value = SNR; %0:5:50; % SNR considering AWGN noise
 phase_noise = 30; %0:5:30; % -70 dBc/Hz + phase_noise, higher the value phase noise is higher
 M = 4; %[4, 8, 16, 32, 64, 128, 256, 512, 1024]; % Modulation order
 N_symbol=1e5; % try for atleast 1e6, how many symbols do we check the error over 
@@ -219,5 +219,5 @@ for im = 1:length(M) % loop for Modulation order
     end
 end
 
-save("newfull_Results.mat","Results")
+save("distandsr_ber.mat","Results")
 

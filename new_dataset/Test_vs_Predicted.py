@@ -60,9 +60,9 @@ y = df['CBER']
 #print("y:\n", y)
 
 #x and y split
-X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
-#print("X:", X)
-y = df['CBER']
+# X = df[['PhaseNoise', 'SymbolRate', 'SNR']]
+# #print("X:", X)
+# y = df['CBER']
 #print("y:\n", y)
 
 # k = 3
@@ -70,9 +70,9 @@ y = df['CBER']
 # selector = SelectKBest(f_regression, k=k)
 # X_new = selector.fit_transform(X, y) 
 
-#Normalize for kNN ONLY
-# scaler = MinMaxScaler()
-# X = scaler.fit_transform(X)
+
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=17)
 
@@ -161,7 +161,7 @@ results_df = pd.DataFrame({
 file_path = "C:/Users/ryanj/Code/Research_THz/excel/NewDataset.xlsx"
 
 # Export
-with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
-    #X_test_df.to_excel(writer, sheet_name='ABR_Features', index=False, startrow=0, startcol=0)
-    results_df.to_excel(writer, sheet_name='ABR_TvPkbest', index=False, startrow=0, startcol=0)
-# %%
+# with pd.ExcelWriter(file_path, mode='a', engine='openpyxl') as writer:
+#     #X_test_df.to_excel(writer, sheet_name='ABR_Features', index=False, startrow=0, startcol=0)
+#     results_df.to_excel(writer, sheet_name='ABRTvPkbest', index=False, startrow=0, startcol=0)
+# # %%
